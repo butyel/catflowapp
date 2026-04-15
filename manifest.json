@@ -1,0 +1,22 @@
+{
+    "name": "CATFLOW",
+    "short_name": "CATFLOW",
+    "description": "SaaS para gestão de gatos para tutores e ONGs.",
+    "start_url": "/index.php",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#14b8a6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/assets/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/assets/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+# Arquivos sensíveis
+config.php
+.env
+.env.local
+
+# Backups e exports
+backups/
+exports/
+*.sql
+
+# Uploads
+uploads/
+*.jpg
+*.png
+*.gif
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
