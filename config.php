@@ -1,28 +1,24 @@
 <?php
-// config.php
-// Configurações do CATFLOW
+// config.php - Configurações do CATFLOW
 
-// Detectar ambiente Vercel
-$is_vercel = getenv('VERCEL') === '1';
-$base_path = $is_vercel ? '/var/task/user' : __DIR__;
+// Verificar se tem DATABASE_URL
+$db_url = getenv('DATABASE_URL') ?: ($_ENV['DATABASE_URL'] ?? '');
 
-// DATABASE_URL tem prioridade
-$database_url = getenv('DATABASE_URL');
-if ($database_url) {
-    $db_url = parse_url($database_url);
+if ($db_url) {
+    $parts = parse_url($db_url);
     return [
-        'db_host' => $db_url['host'] ?? '',
-        'db_name' => ltrim($db_url['path'] ?? '/defaultdb', '/'),
-        'db_user' => $db_url['user'] ?? '',
-        'db_pass' => $db_url['pass'] ?? '',
+        'db_host' => $parts['host'] ?? 'localhost',
+        'db_name' => ltrim($parts['path'] ?? '/defaultdb', '/'),
+        'db_user' => $parts['user'] ?? 'root',
+        'db_pass' => $parts['pass'] ?? '',
         'db_charset' => 'utf8mb4',
         'app_name' => 'CATFLOW',
         'app_url' => 'https://' . (getenv('VERCEL_URL') ?? 'catflow.vercel.app')
     ];
 }
 
-// Variáveis separadas (Vercel)
-if ($is_vercel && getenv('DB_HOST')) {
+// Vercel com variáveis separadas
+if (getenv('DB_HOST')) {
     return [
         'db_host' => getenv('DB_HOST'),
         'db_name' => getenv('DB_NAME') ?: 'defaultdb',
@@ -34,7 +30,7 @@ if ($is_vercel && getenv('DB_HOST')) {
     ];
 }
 
-// Desenvolvimento local
+// Local
 return [
     'db_host' => 'localhost',
     'db_name' => 'catflow',

@@ -1,25 +1,24 @@
 <?php
-// src/db.php
-// Conexão com o banco de dados via PDO
+// Conexão com banco
 
-// Detectar ambiente Vercel
-$is_vercel = getenv('VERCEL') === '1';
-$base_path = $is_vercel ? '/var/task/user' : __DIR__ . '/..';
+// Buscar DATABASE_URL das variáveis de ambiente
+$db_url = getenv('DATABASE_URL') ?: getenv('MYSQL_URL');
 
-// Carrega as configurações
-$config_file = $base_path . '/config.php';
-if (!file_exists($config_file)) {
-    $config_file = __DIR__ . '/../config.php';
+if ($db_url) {
+    $parts = parse_url($db_url);
+    $host = $parts['host'] ?? '';
+    $db = ltrim($parts['path'] ?? '/defaultdb', '/');
+    $user = $parts['user'] ?? 'root';
+    $pass = $parts['pass'] ?? '';
+} else {
+    // Desenvolvimento local
+    $host = 'localhost';
+    $db = 'catflow';
+    $user = 'root';
+    $pass = '';
 }
-$config = require $config_file;
 
-$host = $config['db_host'];
-$db = $config['db_name'];
-$user = $config['db_user'];
-$pass = $config['db_pass'];
-$charset = $config['db_charset'] ?? 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -32,6 +31,6 @@ try {
 catch (\PDOException $e) {
     header('Content-Type: application/json');
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erro conexao BD: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Erro BD: ' . $e->getMessage()]);
     exit;
 }
