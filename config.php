@@ -8,6 +8,7 @@ if ($db_url) {
     $parts = parse_url($db_url);
     return [
         'db_host' => $parts['host'] ?? 'localhost',
+        'db_port' => $parts['port'] ?? '3306',
         'db_name' => ltrim($parts['path'] ?? '/defaultdb', '/'),
         'db_user' => $parts['user'] ?? 'root',
         'db_pass' => $parts['pass'] ?? '',

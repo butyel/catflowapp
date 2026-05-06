@@ -9,6 +9,12 @@ if (!$user_id) {
     json_response(['success' => false, 'message' => 'Não autorizado'], 401);
 }
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    json_response(['success' => false, 'message' => 'Método inválido'], 405);
+}
+
+require_csrf();
+
 $data = json_decode(file_get_contents('php://input'), true);
 $medicamento_id = (int)($data['medicamento_id'] ?? 0);
 
@@ -30,5 +36,5 @@ try {
     json_response(['success' => true, 'message' => 'Dose registrada com sucesso!']);
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro ao registrar dose: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro ao registrar dose.'], 500);
 }

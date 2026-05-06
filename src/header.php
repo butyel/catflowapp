@@ -4,9 +4,6 @@ require_once __DIR__ . '/utils.php';
 require_once __DIR__ . '/alerts.php';
 require_once __DIR__ . '/UI.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }

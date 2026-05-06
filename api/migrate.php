@@ -4,6 +4,7 @@ require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/utils.php';
 
 header('Content-Type: application/json');
+require_admin();
 
 $tables = [
     "users" => "CREATE TABLE IF NOT EXISTS users (
@@ -198,8 +199,9 @@ try {
         'errors' => $errors
     ]);
 } catch (Exception $e) {
+    error_log('Migration error: ' . $e->getMessage());
     json_response([
         'success' => false,
-        'message' => 'Erro: ' . $e->getMessage()
+        'message' => 'Erro ao executar migracao.'
     ], 500);
 }

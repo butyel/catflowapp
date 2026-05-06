@@ -88,8 +88,8 @@ $meses = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho
                 <?php foreach ($registros as $r): ?>
                 <tr class="border-b border-gray-100 last:border-none">
                     <td class="py-3 px-4 text-sm"><?php echo date('d/m', strtotime($r['data'])); ?></td>
-                    <td class="py-3 px-4 text-sm font-medium"><?php echo $r['descricao']; ?></td>
-                    <td class="py-3 px-4 text-xs text-gray-500 capitalize"><?php echo $r['categoria']; ?></td>
+                <td class="py-3 px-4 text-sm font-medium"><?php echo htmlspecialchars($r['descricao'], ENT_QUOTES, 'UTF-8'); ?></td>
+                <td class="py-3 px-4 text-xs text-gray-500 capitalize"><?php echo htmlspecialchars($r['categoria'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td class="py-3 px-4 text-sm font-bold text-right <?php echo $r['tipo'] === 'receita' ? 'text-green-600' : 'text-red-600'; ?>">
                         <?php echo($r['tipo'] === 'receita' ? '+' : '-') . ' R$ ' . number_format($r['valor'], 2, ',', '.'); ?>
                     </td>

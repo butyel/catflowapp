@@ -6,9 +6,14 @@ require_once __DIR__ . '/../src/utils.php';
 
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../src/RateLimiter.php';
+RateLimiter::middleware('register', 5, 60);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_response(['success' => false, 'message' => 'Método não permitido.'], 405);
 }
+
+require_csrf();
 
 $data = json_decode(file_get_contents('php://input'), true);
 if (!$data) {
@@ -24,11 +29,19 @@ if (empty($nome) || empty($email) || empty($senha)) {
     json_response(['success' => false, 'message' => 'Preencha todos os campos obrigatórios.'], 400);
 }
 
+if (strlen($senha) < 8) {
+    json_response(['success' => false, 'message' => 'A senha deve ter no minimo 8 caracteres.'], 400);
+}
+
+if (!preg_match('/[A-Za-z]/', $senha) || !preg_match('/[0-9]/', $senha)) {
+    json_response(['success' => false, 'message' => 'A senha deve conter letras e numeros.'], 400);
+}
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     json_response(['success' => false, 'message' => 'E-mail inválido.'], 400);
 }
 
-$allowed_roles = ['tutor', 'ong', 'admin'];
+$allowed_roles = ['tutor', 'ong'];
 if (!in_array($role, $allowed_roles)) {
     $role = 'tutor';
 }

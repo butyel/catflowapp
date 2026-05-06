@@ -3,18 +3,24 @@ require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/db.php';
 require_login();
 
+$user_id = get_logged_user_id();
+
 $gato_id = (int)($_GET['id'] ?? 0);
 if (!$gato_id) {
     header('Location: gatos.php');
     exit;
 }
 
-// Fetch cat details
 $stmt = $pdo->prepare("SELECT g.*, a.nome as ala_nome FROM gatos g LEFT JOIN alas a ON g.ala_id = a.id WHERE g.id = ?");
 $stmt->execute([$gato_id]);
 $gato = $stmt->fetch();
 
 if (!$gato) {
+    header('Location: gatos.php');
+    exit;
+}
+
+if ($gato['user_id'] != $user_id && !is_admin()) {
     header('Location: gatos.php');
     exit;
 }
@@ -31,7 +37,7 @@ require_once __DIR__ . '/src/header.php';
         <div class="flex flex-col md:flex-row gap-8 items-center relative z-10">
             <div class="w-40 h-40 rounded-[2rem] border-4 border-white flex-shrink-0 relative overflow-hidden shadow-premium group-hover:rotate-2 transition-transform duration-500">
                 <?php if ($gato['foto']): ?>
-                    <img src="<?php echo $gato['foto']; ?>" class="w-full h-full object-cover">
+                    <img src="<?php echo htmlspecialchars($gato['foto']); ?>" class="w-full h-full object-cover">
                 <?php
 else: ?>
                     <div class="w-full h-full bg-gray-50 flex items-center justify-center text-6xl shadow-inner">
@@ -43,17 +49,17 @@ endif; ?>
             
             <div class="flex-1 text-center md:text-left">
                 <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                    <h1 class="text-4xl font-display font-extrabold text-gray-800 tracking-tight leading-none"><?php echo $gato['nome']; ?></h1>
+                    <h1 class="text-4xl font-display font-extrabold text-gray-800 tracking-tight leading-none"><?php echo htmlspecialchars($gato['nome']); ?></h1>
                     <div class="flex gap-2 justify-center">
                         <?php
 $statusClass = strtolower($gato['status']) === 'ativo' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-gray-50 text-gray-600 border-gray-100';
 ?>
                         <span class="px-3 py-1 <?php echo $statusClass; ?> rounded-full text-[10px] font-bold uppercase tracking-widest border">
-                            <?php echo $gato['status']; ?>
+                            <?php echo htmlspecialchars($gato['status']); ?>
                         </span>
                         <?php if ($gato['ala_nome']): ?>
                         <span class="px-3 py-1 bg-brand-50 text-brand-700 rounded-full text-[10px] font-bold uppercase tracking-widest border border-brand-100">
-                            📍 <?php echo $gato['ala_nome']; ?>
+                            📍 <?php echo htmlspecialchars($gato['ala_nome']); ?>
                         </span>
                         <?php
 endif; ?>
@@ -86,7 +92,7 @@ endif; ?>
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Cuidados Especiais / Alergias</p>
-                        <p class="text-sm text-red-700 font-medium leading-relaxed"><?php echo nl2br($gato['doencas_pre_existentes']); ?></p>
+                        <p class="text-sm text-red-700 font-medium leading-relaxed"><?php echo nl2br(htmlspecialchars($gato['doencas_pre_existentes'], ENT_QUOTES, 'UTF-8')); ?></p>
                     </div>
                 </div>
                 <?php

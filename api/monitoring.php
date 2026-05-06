@@ -23,6 +23,7 @@ try {
         json_response(['success' => true, 'data' => $stmt->fetchAll()]);
     }
     elseif ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_csrf();
         $data = json_decode(file_get_contents('php://input'), true);
         $gato_id = (int)($data['gato_id'] ?? 0);
         $comportamento = sanitize_input($data['comportamento'] ?? '');
@@ -35,6 +36,8 @@ try {
         if (!$gato_id)
             json_response(['success' => false, 'message' => 'ID do gato obrigatório'], 400);
 
+        verify_gato_ownership($pdo, $gato_id, $user_id);
+
         $stmt = $pdo->prepare("INSERT INTO monitoramento_diario (gato_id, comportamento, caixa_areia, apetite, energia, data, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$gato_id, $comportamento, $caixa_areia, $apetite, $energia, $data_log, $observacoes]);
 
@@ -42,5 +45,5 @@ try {
     }
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro interno do servidor.'], 500);
 }

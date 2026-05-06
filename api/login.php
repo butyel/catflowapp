@@ -28,9 +28,9 @@ try {
     $user = $stmt->fetch();
 
     if ($user && password_verify($senha, $user['senha_hash'])) {
-        login_user($user['id'], $user['nome'], $user['role'], $user['foto']);
-        
         session_regenerate_id(true);
+
+        login_user($user['id'], $user['nome'], $user['role'], $user['foto']);
         
         if (class_exists('Logger')) {
             Logger::login($user['id'], true);

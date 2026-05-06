@@ -18,7 +18,6 @@ class Security {
 
     public static function sanitizeInput(string $value): string {
         $value = trim($value);
-        $value = stripslashes($value);
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 
@@ -51,8 +50,9 @@ class Security {
     public static function setSecurityHeaders(): void {
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
-        header('X-XSS-Protection: 1; mode=block');
         header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'");
     }
 
     public static function rateLimit(string $key, int $maxAttempts = 60, int $windowSeconds = 60): bool {

@@ -1,6 +1,7 @@
 <?php
 class UI {
     public static function toast(string $message, string $type = 'success', int $duration = 3000): string {
+        $safe_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
         $icons = [
             'success' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
             'error' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
@@ -18,7 +19,7 @@ class UI {
         return <<<HTML
         <div id="toast-{$type}" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-4 py-3 rounded-2xl {$colors[$type]} text-white shadow-lg transform transition-all duration-300 translate-y-[-100px] opacity-0">
             <span class="flex-shrink-0">{$icons[$type]}</span>
-            <span class="font-semibold text-sm">{$message}</span>
+            <span class="font-semibold text-sm">{$safe_message}</span>
         </div>
         <script>
             (function() {
@@ -60,17 +61,20 @@ class UI {
     }
 
     public static function emptyState(string $title, string $description, string $buttonText = '', string $buttonAction = ''): string {
-        $button = $buttonText ? 
-            "<button onclick=\"{$buttonAction}\" class=\"mt-4 bg-brand-50 text-brand-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-brand-100 transition-colors\">{$buttonText}</button>" : '';
-        
+        $safe_title = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $safe_description = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
+        $safe_buttonText = htmlspecialchars($buttonText, ENT_QUOTES, 'UTF-8');
+        $button = $buttonText ?
+        "<button onclick=\"{$buttonAction}\" class=\"mt-4 bg-brand-50 text-brand-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-brand-100 transition-colors\">{$safe_buttonText}</button>" : '';
+
         return <<<HTML
-        <div class="text-center py-16 bg-white rounded-[2rem] border border-white shadow-premium">
-            <div class="text-6xl mb-4">🐱</div>
-            <p class="text-gray-800 font-display font-bold text-lg">{$title}</p>
-            <p class="text-gray-400 text-sm mt-2">{$description}</p>
-            {$button}
-        </div>
-        HTML;
+<div class="text-center py-16 bg-white rounded-[2rem] border border-white shadow-premium">
+    <div class="text-6xl mb-4">🐱</div>
+    <p class="text-gray-800 font-display font-bold text-lg">{$safe_title}</p>
+    <p class="text-gray-400 text-sm mt-2">{$safe_description}</p>
+    {$button}
+</div>
+HTML;
     }
 
     public static function skeletonCard(): string {
@@ -92,6 +96,9 @@ class UI {
     }
 
     public static function confirmModal(string $id, string $title, string $message, string $confirmText = 'Confirmar', string $confirmAction = '', string $type = 'danger'): string {
+        $safe_title = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $safe_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $safe_confirmText = htmlspecialchars($confirmText, ENT_QUOTES, 'UTF-8');
         $colors = [
             'danger' => 'bg-red-500 hover:bg-red-600',
             'warning' => 'bg-yellow-500 hover:bg-yellow-600',
@@ -107,11 +114,11 @@ class UI {
             <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden transform transition-all">
                 <div class="p-6 text-center">
                     {$icon}
-                    <h3 class="text-xl font-display font-extrabold text-gray-800 mb-2">{$title}</h3>
-                    <p class="text-gray-500 text-sm mb-6">{$message}</p>
+        <h3 class="text-xl font-display font-extrabold text-gray-800 mb-2">{$safe_title}</h3>
+        <p class="text-gray-500 text-sm mb-6">{$safe_message}</p>
                     <div class="flex gap-3">
                         <button onclick="closeConfirmModal('{$id}')" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors">Cancelar</button>
-                        <button onclick="{$confirmAction}; closeConfirmModal('{$id}')" class="flex-1 {$colors[$type]} text-white font-bold py-3 rounded-xl transition-colors">{$confirmText}</button>
+                        <button onclick="{$confirmAction}; closeConfirmModal('{$id}')" class="flex-1 {$colors[$type]} text-white font-bold py-3 rounded-xl transition-colors">{$safe_confirmText}</button>
                     </div>
                 </div>
             </div>

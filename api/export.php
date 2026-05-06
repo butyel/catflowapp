@@ -6,6 +6,9 @@ require_once __DIR__ . '/../src/utils.php';
 header('Content-Type: application/json');
 require_login();
 
+require_once __DIR__ . '/../src/RateLimiter.php';
+RateLimiter::middleware('export', 5, 60);
+
 $user_id = get_logged_user_id();
 $is_admin = is_admin();
 
@@ -22,7 +25,7 @@ if (!in_array($format, ['csv', 'pdf'])) {
 }
 
 try {
-    $filename = "catflow_{$type}_" . date('Y-m-d') . ".{$format}";
+    $filename = "catflow_{$type}_" . date('Y-m-d') . "_" . bin2hex(random_bytes(8)) . ".{$format}";
     $export_dir = __DIR__ . '/../exports';
     if (!is_dir($export_dir)) {
         mkdir($export_dir, 0755, true);
@@ -135,5 +138,6 @@ try {
         ]);
     }
 } catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro ao exportar: ' . $e->getMessage()], 500);
+    error_log('Export error: ' . $e->getMessage());
+    json_response(['success' => false, 'message' => 'Erro ao exportar dados.'], 500);
 }

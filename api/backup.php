@@ -6,6 +6,9 @@ require_once __DIR__ . '/../src/utils.php';
 header('Content-Type: application/json');
 require_login();
 
+require_once __DIR__ . '/../src/RateLimiter.php';
+RateLimiter::middleware('backup', 3, 60);
+
 $user_id = get_logged_user_id();
 $is_admin = is_admin();
 
@@ -25,14 +28,21 @@ $timestamp = date('Y-m-d_H-i-s');
 $filename = "catflow_backup_{$timestamp}.sql";
 $filepath = $backup_dir . '/' . $filename;
 
-$command = "mysqldump -h{$config['db_host']} -u{$config['db_user']}" . 
-    ($config['db_pass'] ? " -p{$config['db_pass']}" : '') . 
-    " --single-transaction --quick --lock-tables=false {$db_name} > \"{$filepath}\"";
+$safe_host = escapeshellarg($config['db_host']);
+$safe_user = escapeshellarg($config['db_user']);
+$safe_pass = $config['db_pass'] ? escapeshellarg($config['db_pass']) : '';
+$safe_db = escapeshellarg($db_name);
+$safe_filepath = escapeshellarg($filepath);
+
+$command = "mysqldump -h{$safe_host} -u{$safe_user}" .
+    ($safe_pass ? " -p{$safe_pass}" : '') .
+    " --single-transaction --quick --lock-tables=false {$safe_db} > {$safe_filepath}";
 
 exec($command . " 2>&1", $output, $return_code);
 
 if ($return_code !== 0 || !file_exists($filepath)) {
-    json_response(['success' => false, 'message' => 'Erro ao criar backup', 'details' => implode("\n", $output)], 500);
+    error_log('Backup failed: ' . implode("\n", $output));
+    json_response(['success' => false, 'message' => 'Erro ao criar backup'], 500);
 }
 
 $files = glob($backup_dir . '/catflow_backup_*.sql');

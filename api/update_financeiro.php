@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/db.php';
@@ -9,6 +9,8 @@ if (!$user_id) {
     echo json_encode(['success' => false, 'message' => 'Não autorizado']);
     exit;
 }
+
+require_csrf();
 
 $data = json_decode(file_get_contents('php://input'), true);
 $id = (int)($data['id'] ?? 0);
@@ -35,5 +37,5 @@ try {
     
     echo json_encode(['success' => true, 'message' => 'Registro atualizado com sucesso!']);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Erro ao atualizar registro.']);
 }

@@ -1,6 +1,19 @@
 <?php
 // src/auth.php
-// Funções de Autenticação e Middleware
+// Funcoes de Autenticacao e Middleware
+if (getenv('VERCEL') || getenv('VERCEL_URL')) {
+    session_save_path('/tmp');
+}
+
+$is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443;
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => $is_https,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 session_start();
 date_default_timezone_set('America/Sao_Paulo');
 

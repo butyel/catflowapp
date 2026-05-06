@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . "/../src/auth.php";
 require_once __DIR__ . "/../src/db.php";
@@ -20,8 +20,9 @@ try {
             json_response(["success" => true, "data" => $items]);
             break;
 
-        case "upsert":
-            if ($_SERVER["REQUEST_METHOD"] !== "POST") json_response(["success" => false, "message" => "Método inválido"], 405);
+    case "upsert":
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") json_response(["success" => false, "message" => "Método inválido"], 405);
+        require_csrf();
             $data = json_decode(file_get_contents("php://input"), true);
             $id = (int)($data["id"] ?? 0);
             $nome = trim($data["nome_item"] ?? "");
@@ -42,8 +43,9 @@ try {
             json_response(["success" => true, "message" => "Item salvo com sucesso!"]);
             break;
 
-        case "move":
-            if ($_SERVER["REQUEST_METHOD"] !== "POST") json_response(["success" => false, "message" => "Método inválido"], 405);
+    case "move":
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") json_response(["success" => false, "message" => "Método inválido"], 405);
+        require_csrf();
             $data = json_decode(file_get_contents("php://input"), true);
             $id = (int)($data["estoque_id"] ?? 0);
             $tipo = $data["tipo"] ?? ""; // entrada, saida, ajuste
@@ -79,8 +81,9 @@ try {
             json_response(["success" => true, "message" => "Movimentação registrada!"]);
             break;
 
-        case "delete":
-            if ($_SERVER["REQUEST_METHOD"] !== "POST") json_response(["success" => false, "message" => "Método inválido"], 405);
+    case "delete":
+        if ($_SERVER["REQUEST_METHOD"] !== "POST") json_response(["success" => false, "message" => "Método inválido"], 405);
+        require_csrf();
             $data = json_decode(file_get_contents("php://input"), true);
             $id = (int)($data["id"] ?? 0);
             $stmt = $pdo->prepare("DELETE FROM estoque WHERE id = ? AND user_id = ?");
@@ -101,5 +104,6 @@ try {
     }
 } catch (Exception $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
-    json_response(["success" => false, "message" => "Erro: " . $e->getMessage()], 500);
+    error_log('Inventory error: ' . $e->getMessage());
+    json_response(["success" => false, "message" => "Erro interno do servidor."], 500);
 }

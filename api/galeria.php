@@ -23,6 +23,7 @@ try {
         json_response(['success' => true, 'data' => $stmt->fetchAll()]);
     }
     elseif ($action === 'upload' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_csrf();
         $gato_id = (int)($_POST['gato_id'] ?? 0);
         $legenda = sanitize_input($_POST['legenda'] ?? '');
         $data_foto = $_POST['data'] ?? date('Y-m-d');
@@ -30,11 +31,26 @@ try {
         if (!$gato_id)
             json_response(['success' => false, 'message' => 'ID do gato obrigatório'], 400);
 
+        verify_gato_ownership($pdo, $gato_id, $user_id);
+
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['foto'];
+
+            // Validar tipo real via finfo (não confiar no MIME do cliente)
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+            $allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!in_array($mime, $allowed_types)) {
+                json_response(['success' => false, 'message' => 'Tipo de arquivo inválido. Use JPG, PNG, WEBP ou GIF.'], 400);
+            }
+            if ($file['size'] > 5 * 1024 * 1024) {
+                json_response(['success' => false, 'message' => 'Imagem muito grande. Máximo 5MB.'], 400);
+            }
+
             $upload_dir = __DIR__ . '/../assets/uploads/galeria/';
             if (!is_dir($upload_dir))
-                mkdir($upload_dir, 0777, true);
+                mkdir($upload_dir, 0755, true);
 
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
             $filename = 'galeria_' . time() . '_' . uniqid() . '.' . $ext;
@@ -51,5 +67,5 @@ try {
     }
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro interno do servidor.'], 500);
 }

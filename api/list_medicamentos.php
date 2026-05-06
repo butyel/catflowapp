@@ -35,5 +35,5 @@ try {
     json_response(['success' => true, 'data' => $medicamentos]);
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro ao listar medicamentos: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro ao listar medicamentos.'], 500);
 }

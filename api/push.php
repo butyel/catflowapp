@@ -19,38 +19,40 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS push_subscriptions (
 $user_id = get_logged_user_id();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!isset($data['action'])) {
+    $action = $data['action'] ?? null;
+
+    if ($action === null) {
+        // Subscribe
         $endpoint = $data['endpoint'] ?? '';
         $keys = $data['keys'] ?? [];
-        
+
         if (empty($endpoint)) {
             json_response(['success' => false, 'message' => 'Endpoint obrigatório'], 400);
         }
-        
+
         try {
             $keys_json = json_encode($keys);
             $stmt = $pdo->prepare("INSERT INTO push_subscriptions (user_id, endpoint, keys_json) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE keys_json = VALUES(keys_json)");
             $stmt->execute([$user_id, $endpoint, $keys_json]);
-            
             json_response(['success' => true, 'message' => 'Inscrição salva']);
         } catch (Exception $e) {
             json_response(['success' => false, 'message' => 'Erro ao salvar'], 500);
         }
-    }
-    
-    if ($data['action'] === 'unsubscribe') {
+    } elseif ($action === 'unsubscribe') {
+        // Unsubscribe
         $endpoint = $data['endpoint'] ?? '';
-        
+
         try {
             $stmt = $pdo->prepare("DELETE FROM push_subscriptions WHERE user_id = ? AND endpoint = ?");
             $stmt->execute([$user_id, $endpoint]);
-            
             json_response(['success' => true, 'message' => 'Inscrição removida']);
         } catch (Exception $e) {
             json_response(['success' => false, 'message' => 'Erro ao remover'], 500);
         }
+    } else {
+        json_response(['success' => false, 'message' => 'Ação inválida'], 400);
     }
 }
 

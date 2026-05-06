@@ -57,5 +57,6 @@ try {
     json_response(['success' => true, 'data' => $alerts]);
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro ao carregar alertas: ' . $e->getMessage()], 500);
+    error_log('Dashboard alerts error: ' . $e->getMessage());
+    json_response(['success' => false, 'message' => 'Erro ao carregar alertas.'], 500);
 }

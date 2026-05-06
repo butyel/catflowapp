@@ -1,4 +1,13 @@
 <?php
+// Ocultar erros em produção — nunca expor detalhes internos
+if (getenv('APP_ENV') === 'development' || getenv('VERCEL_ENV') === 'development') {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+}
 require_once __DIR__ . '/src/auth.php';
 
 // If already logged in, redirect to dashboard

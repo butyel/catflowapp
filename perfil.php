@@ -3,7 +3,7 @@ require_once __DIR__ . '/src/auth.php';
 require_login();
 
 // Logout Action
-if (isset($_GET['logout'])) {
+if (isset($_POST['logout']) && isset($_POST['csrf_token']) && hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
     logout_user();
 }
 
@@ -17,7 +17,7 @@ require_once __DIR__ . '/src/header.php';
     <div class="relative inline-block group mb-4">
         <div id="profile-img-container" class="w-32 h-32 bg-brand-50 text-brand-500 rounded-[2.5rem] mx-auto flex items-center justify-center text-4xl font-display font-extrabold shadow-inner border-4 border-white overflow-hidden group-hover:rotate-3 transition-transform duration-500">
             <?php if (isset($_SESSION['user_foto']) && $_SESSION['user_foto']): ?>
-                <img src="<?php echo $_SESSION['user_foto']; ?>" class="w-full h-full object-cover" id="current-photo">
+                <img src="<?php echo htmlspecialchars($_SESSION['user_foto']); ?>" class="w-full h-full object-cover" id="current-photo">
             <?php
 else: ?>
                 <span id="photo-placeholder"><?php echo strtoupper(substr($_SESSION['user_nome'], 0, 1)); ?></span>
@@ -107,9 +107,13 @@ async function uploadPhoto(input) {
 endif; ?>
 </div>
 
-<a href="perfil.php?logout=true" class="w-full flex items-center justify-center gap-3 bg-red-50 hover:bg-red-100 text-red-600 font-black py-5 rounded-[2rem] transition-all active:scale-95 text-xs uppercase tracking-[0.2em] shadow-sm">
+<form method="POST" action="perfil.php" class="w-full">
+    <input type="hidden" name="logout" value="1">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    <button type="submit" class="w-full flex items-center justify-center gap-3 bg-red-50 hover:bg-red-100 text-red-600 font-black py-5 rounded-[2rem] transition-all active:scale-95 text-xs uppercase tracking-[0.2em] shadow-sm">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
     Sair da Conta
-</a>
+    </button>
+</form>
 
 <?php require_once __DIR__ . '/src/footer.php'; ?>

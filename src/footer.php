@@ -32,7 +32,7 @@
                 <div class="relative p-1.5 <?php echo strpos($_SERVER['PHP_SELF'], 'perfil') !== false ? 'bg-brand-50 rounded-xl' : ''; ?>">
                     <?php if (isset($_SESSION['user_foto']) && $_SESSION['user_foto']): ?>
                         <div class="w-6 h-6 rounded-full overflow-hidden border-2 <?php echo strpos($_SERVER['PHP_SELF'], 'perfil') !== false ? 'border-brand-500' : 'border-gray-300'; ?>">
-                            <img src="<?php echo $_SESSION['user_foto']; ?>" class="w-full h-full object-cover">
+                            <img src="<?php echo htmlspecialchars($_SESSION['user_foto']); ?>" class="w-full h-full object-cover">
                         </div>
                     <?php
     else: ?>

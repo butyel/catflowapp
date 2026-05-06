@@ -13,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_response(['success' => false, 'message' => 'Método inválido'], 405);
 }
 
+require_csrf();
+
 $data = json_decode(file_get_contents('php://input'), true);
 $id = (int)($data['id'] ?? 0);
 
@@ -34,5 +36,5 @@ try {
     json_response(['success' => true, 'message' => 'Tratamento excluído com sucesso!']);
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro ao excluir: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro ao excluir tratamento.'], 500);
 }

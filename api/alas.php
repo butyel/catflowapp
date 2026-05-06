@@ -19,6 +19,7 @@ try {
         json_response(['success' => true, 'data' => $stmt->fetchAll()]);
     }
     elseif ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_csrf();
         $data = json_decode(file_get_contents('php://input'), true);
         $nome = sanitize_input($data['nome'] ?? '');
         $descricao = sanitize_input($data['descricao'] ?? '');
@@ -32,6 +33,7 @@ try {
         json_response(['success' => true, 'message' => 'Ala criada com sucesso!', 'id' => $pdo->lastInsertId()]);
     }
     elseif ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        require_csrf();
         $data = json_decode(file_get_contents('php://input'), true);
         $id = (int)($data['id'] ?? 0);
 
@@ -41,5 +43,5 @@ try {
     }
 }
 catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro interno do servidor.'], 500);
 }

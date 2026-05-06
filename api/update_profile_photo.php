@@ -7,6 +7,8 @@ require_once __DIR__ . '/../src/utils.php';
 header('Content-Type: application/json');
 require_login();
 
+require_csrf();
+
 $user_id = get_logged_user_id();
 
 if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
@@ -25,7 +27,10 @@ if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
 
 $file = $_FILES['foto'];
 $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-if (!in_array($file['type'], $allowed_types)) {
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$mime = finfo_file($finfo, $file['tmp_name']);
+finfo_close($finfo);
+if (!in_array($mime, $allowed_types)) {
     json_response(['success' => false, 'message' => 'Tipo de arquivo não permitido. Use JPG, PNG ou GIF.'], 400);
 }
 
@@ -36,10 +41,14 @@ if ($file['size'] > 5 * 1024 * 1024) {
 
 $upload_dir = __DIR__ . '/../assets/uploads/perfil/';
 if (!is_dir($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
+    mkdir($upload_dir, 0755, true);
 }
 
-$ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+$allowed_exts = ['jpg', 'jpeg', 'png', 'gif'];
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+if (!in_array($ext, $allowed_exts)) {
+    json_response(['success' => false, 'message' => 'Extensao de arquivo nao permitida.'], 400);
+}
 $filename = 'user_' . $user_id . '_' . time() . '.' . $ext;
 $target_path = $upload_dir . $filename;
 $web_path = 'assets/uploads/perfil/' . $filename;

@@ -15,6 +15,8 @@ if (!$is_admin) {
 
 $data = json_decode(file_get_contents('php://input'), true);
 
+require_csrf();
+
 $title = $data['title'] ?? 'CATFLOW';
 $body = $data['body'] ?? '';
 $target = $data['target'] ?? 'all';
@@ -60,5 +62,5 @@ try {
         'recipients' => $sent_count
     ]);
 } catch (Exception $e) {
-    json_response(['success' => false, 'message' => 'Erro ao enviar: ' . $e->getMessage()], 500);
+    json_response(['success' => false, 'message' => 'Erro ao enviar notificacao.'], 500);
 }
