@@ -1,28 +1,36 @@
-# Arquivos sensíveis
-config.php
+# Dependencies
+node_modules/
+
+# Environment
 .env
 .env.local
+.env*.local
 
-# Backups e exports
-backups/
-exports/
+# Database
+prisma/dev.db
+prisma/dev.db-journal
 *.sql
 
 # Uploads
-uploads/
-*.jpg
-*.png
-*.gif
+public/uploads/*
+!public/uploads/.gitkeep
 
-# Sistema
-.DS_Store
-Thumbs.db
-*.log
+# Build
+.next/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# System
+.DS_Store
+Thumbs.db
+*.log
+
+# Vercel
 .vercel
-.env*.local
+
+# Old PHP
+_php_old/

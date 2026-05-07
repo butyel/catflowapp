@@ -1,7 +1,37 @@
 {
   "name": "catflow",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "node -e \"if(process.env.VERCEL){require('fs').copyFileSync('prisma/schema.mysql.prisma','prisma/schema.prisma')}\" && prisma generate",
+    "vercel-build": "node -e \"require('fs').copyFileSync('prisma/schema.mysql.prisma','prisma/schema.prisma')\" && prisma generate && next build",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
+  },
   "dependencies": {
-    "vercel-php": "0.9.0"
+    "@prisma/client": "^5.14.0",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.3.0",
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.3",
+    "postcss": "^8.4.38",
+    "prisma": "^5.14.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.4.5"
   }
 }

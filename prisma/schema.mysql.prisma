@@ -1,0 +1,283 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nome      String   @db.VarChar(100)
+  email     String   @db.VarChar(100) @unique
+  senhaHash String   @map("senha_hash") @db.VarChar(255)
+  role      String   @default("tutor") @db.VarChar(10)
+  foto      String?  @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  alas              Ala[]
+  gatos             Gato[]
+  estoque           Estoque[]
+  financeiroItens   FinanceiroItem[]
+  financeiro        Financeiro[]
+  lembretes         Lembrete[]
+  pushSubscriptions PushSubscription[]
+  logsAuditoria     LogAuditoria[]
+
+  @@map("users")
+}
+
+model Ala {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  nome      String   @db.VarChar(100)
+  descricao String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gatos Gato[]
+
+  @@map("alas")
+}
+
+model Gato {
+  id                   Int      @id @default(autoincrement())
+  userId               Int      @map("user_id")
+  alaId                Int?     @map("ala_id")
+  nome                 String   @db.VarChar(100)
+  foto                 String?  @db.VarChar(255)
+  raca                 String?  @db.VarChar(100)
+  sexo                 String   @db.VarChar(1)
+  dataNascimento       DateTime? @map("data_nascimento") @db.Date
+  corPadrao            String?   @map("cor_padrao") @db.VarChar(100)
+  microchip            String?   @db.VarChar(50)
+  pedigree             String?   @db.VarChar(100)
+  doencasPreExistentes String?   @map("doencas_pre_existentes") @db.Text
+  idade                String?   @db.VarChar(50)
+  castrado             Boolean   @default(false)
+  peso                 Float?
+  personalidade        String?   @db.VarChar(255)
+  status               String    @default("ativo") @db.VarChar(20)
+  historico            String?   @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ala               Ala?                 @relation(fields: [alaId], references: [id], onDelete: SetNull)
+  saude             Saude[]
+  pesoHistorico     PesoHistorico[]
+  monitoramentoDiario MonitoramentoDiario[]
+  galeria           Galeria[]
+  medicamentos      Medicamento[]
+  adocoes           Adocao[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("gatos")
+}
+
+model Saude {
+  id          Int      @id @default(autoincrement())
+  gatoId      Int      @map("gato_id")
+  tipo        String   @db.VarChar(50)
+  descricao   String   @db.VarChar(255)
+  dataEvento  DateTime @map("data_evento") @db.Date
+  proximaData DateTime? @map("proxima_data") @db.Date
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  gato Gato @relation(fields: [gatoId], references: [id], onDelete: Cascade)
+
+  @@index([gatoId])
+  @@map("saude")
+}
+
+model PesoHistorico {
+  id        Int      @id @default(autoincrement())
+  gatoId    Int      @map("gato_id")
+  peso      Float
+  data      DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+
+  gato Gato @relation(fields: [gatoId], references: [id], onDelete: Cascade)
+
+  @@map("peso_historico")
+}
+
+model MonitoramentoDiario {
+  id            Int      @id @default(autoincrement())
+  gatoId        Int      @map("gato_id")
+  comportamento String?  @db.VarChar(255)
+  caixaAreia    String?  @map("caixa_areia") @db.VarChar(255)
+  apetite       String?  @db.VarChar(255)
+  energia       String?  @db.VarChar(255)
+  data          DateTime @db.Date
+  observacoes   String?  @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  gato Gato @relation(fields: [gatoId], references: [id], onDelete: Cascade)
+
+  @@map("monitoramento_diario")
+}
+
+model Estoque {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  nomeItem        String   @map("nome_item") @db.VarChar(100)
+  categoria       String   @db.VarChar(20)
+  quantidadeAtual Float    @default(0) @map("quantidade_atual")
+  unidade         String   @default("un") @db.VarChar(20)
+  estoqueMinimo   Float    @default(0) @map("estoque_minimo")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movimentacoes EstoqueMovimentacao[]
+
+  @@map("estoque")
+}
+
+model EstoqueMovimentacao {
+  id            Int      @id @default(autoincrement())
+  estoqueId     Int      @map("estoque_id")
+  tipo          String   @db.VarChar(10)
+  quantidade    Float
+  observacao    String?  @db.Text
+  dataMovimento DateTime @default(now()) @map("data_movimento")
+
+  estoque Estoque @relation(fields: [estoqueId], references: [id], onDelete: Cascade)
+
+  @@map("estoque_movimentacoes")
+}
+
+model Galeria {
+  id        Int      @id @default(autoincrement())
+  gatoId    Int      @map("gato_id")
+  fotoPath  String   @map("foto_path") @db.VarChar(255)
+  legenda   String?  @db.VarChar(255)
+  data      DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+
+  gato Gato @relation(fields: [gatoId], references: [id], onDelete: Cascade)
+
+  @@map("galeria")
+}
+
+model Medicamento {
+  id              Int      @id @default(autoincrement())
+  gatoId          Int      @map("gato_id")
+  nomeMedicamento String   @map("nome_medicamento") @db.VarChar(100)
+  dosagem         String   @db.VarChar(100)
+  horario         String   @db.VarChar(5)
+  duracaoDias     Int      @map("duracao_dias")
+  status          String   @default("ativo") @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  gato     Gato                   @relation(fields: [gatoId], references: [id], onDelete: Cascade)
+  historico MedicamentoHistorico[]
+
+  @@index([gatoId])
+  @@map("medicamentos")
+}
+
+model MedicamentoHistorico {
+  id            Int      @id @default(autoincrement())
+  medicamentoId Int      @map("medicamento_id")
+  dataAplicacao DateTime @default(now()) @map("data_aplicacao")
+  observacao    String?  @db.Text
+
+  medicamento Medicamento @relation(fields: [medicamentoId], references: [id], onDelete: Cascade)
+
+  @@map("medicamentos_historico")
+}
+
+model FinanceiroItem {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @map("user_id")
+  nome          String   @db.VarChar(100)
+  precoUnitario Float    @map("preco_unitario")
+  categoria     String   @db.VarChar(20)
+  unidade       String   @default("un") @db.VarChar(20)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  financeiro Financeiro[]
+
+  @@map("financeiro_itens")
+}
+
+model Financeiro {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  itemId     Int?     @map("item_id")
+  tipo       String   @db.VarChar(10)
+  descricao  String   @db.VarChar(255)
+  categoria  String   @db.VarChar(20)
+  quantidade Float    @default(1)
+  valor      Float
+  data       DateTime @db.Date
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item FinanceiroItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([data])
+  @@map("financeiro")
+}
+
+model Adocao {
+  id           Int      @id @default(autoincrement())
+  gatoId       Int      @map("gato_id")
+  adotanteNome String   @map("adotante_nome") @db.VarChar(100)
+  contato      String   @db.VarChar(255)
+  dataAdocao   DateTime @map("data_adocao") @db.Date
+  observacoes  String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  gato Gato @relation(fields: [gatoId], references: [id], onDelete: Cascade)
+
+  @@index([gatoId])
+  @@map("adocoes")
+}
+
+model Lembrete {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  titulo       String   @db.VarChar(100)
+  descricao    String?  @db.Text
+  dataLembrete DateTime @map("data_lembrete")
+  status       String   @default("pendente") @db.VarChar(10)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("lembretes")
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  endpoint  String   @db.VarChar(500)
+  keysJson  String   @map("keys_json") @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
+}
+
+model LogAuditoria {
+  id         Int      @id @default(autoincrement())
+  userId     Int?     @map("user_id")
+  acao       String   @db.VarChar(50)
+  entidade   String   @db.VarChar(50)
+  entidadeId Int?     @map("entidade_id")
+  detalhes   String?  @db.Text
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  userAgent  String?  @map("user_agent") @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("logs_auditoria")
+}
